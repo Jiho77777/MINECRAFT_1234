@@ -229,7 +229,7 @@ tile(56,x=>[x%4==0?[100,95,90]:[125,120,115],14]);tile(57,rg4([125,120,115],[195
 const dr=(base,edge,pan,hdl,win)=>up=>(x,y)=>{if(x<2||x>13||y<1||y>14)return[edge,8];if(up&&win&&x>=4&&x<=11&&y>=3&&y<=8)return[win,6];if(!up&&x==12&&y==8)return[hdl,0];const p=x>=3&&x<=12&&(up?(y>=10&&y<=13):((y>=2&&y<=6)||(y>=9&&y<=13)));return[p?pan:base,10]};
 tile(60,dr([135,98,50],[90,62,32],[165,125,70],[40,30,20],0)(0));tile(61,dr([135,98,50],[90,62,32],[165,125,70],[40,30,20],[60,45,30])(1));
 tile(62,dr([205,205,210],[140,140,148],[225,225,230],[60,60,60],0)(0));tile(63,dr([205,205,210],[140,140,148],[225,225,230],[60,60,60],[70,75,85])(1));tile(64,(x,y)=>[[48,48,52],36]);
-tile(65,(x,y)=>((x>=6&&x<=9)||(y>=6&&y<=9))?[[178,32,37],28]:((x>=5&&x<=10)||(y>=5&&y<=10))?[[103,28,32],16]:[[69,26,30],10]);
+tile(65,(x,y)=>((x+y)%5==0)?[[119,27,31],18]:[[151,34,37],22]);
 tile(66,(x,y)=>x%7==0||y%7==0?[[135,20,24],20]:[[190,24,28],30]);
 tile(67,(x,y)=>y>4&&x>=6&&x<=9?[[125,82,42],20]:((x+y)%5<2?[[245,45,25],35]:[[210,22,24],22]));
 tile(68,(x,y)=>x<2||y<2||x>13||y>13?[[55,55,58],8]:((x+y)%5==0?[[145,145,148],12]:[[112,112,116],10]));
@@ -240,7 +240,7 @@ tile(72,(x,y)=>x<2||y<2||x>13||y>13?[[45,40,36],8]:[[87,67,48],12]);tile(73,(x,y
 tile(74,(x,y)=>x<2||y<2||x>13||y>13?[[42,42,45],8]:[[100,100,104],12]);
 tile(75,(x,y)=>((x-7)**2+(y-8)**2<12||((x+3*y)%11<2))?[[195,34,39],24]:[[105,105,108],22]);
 tile(76,(x,y)=>((x<4||x>11)&&(y<4||y>11))?[[178,178,180],18]:(x<2||y<2||x>13||y>13)?[[87,69,48],12]:((x%5==0)?[[137,104,67],12]:[[191,161,119],15]));
-tile(77,(x,y)=>((x>=6&&x<=9)||(y>=6&&y<=9))?[[245,54,48],28]:((x>=5&&x<=10)||(y>=5&&y<=10))?[[180,35,39],20]:[[90,24,30],12]);
+tile(77,(x,y)=>((x+y)%5==0)?[[218,48,40],22]:[[249,77,56],28]);
 tile(78,(x,y)=>x<2||y<2||x>13||y>13?[[190,190,194],8]:[[235,235,238],14]);tile(79,(x,y)=>x>=7&&x<=8&&y>=2&&y<=12?[[235,55,45],20]:[[115,72,36],12]);
 const IT=['#a0753f','#8d8d8d','#e8e8e8','#4de4e0'];
 const ic=document.createElement('canvas');ic.width=624;ic.height=16;const ig=ic.getContext('2d');
@@ -286,7 +286,7 @@ const Q=[[[1,0,0],[1,1,0],[1,1,1],[1,0,1]],[[0,0,1],[0,1,1],[0,1,0],[0,0,0]],[[0
 [[0,0,1],[0,0,0],[1,0,0],[1,0,1]],[[1,0,1],[1,1,1],[0,1,1],[0,0,1]],[[0,0,0],[0,1,0],[1,1,0],[1,0,0]]];
 const UV=[[0,0],[0,1],[1,1],[1,0]],SH=[.8,.8,1,.5,.66,.66];
 const PB={},VAR=new Set(),inPB=(id,fx,fy,fz)=>PB[id].bx.some(b=>fx>=b[0]-.02&&fx<=b[3]+.02&&fy>=b[1]-.02&&fy<=b[4]+.02&&fz>=b[2]-.02&&fz<=b[5]+.02);
-function emitPB(b,x,y,z,P,C,U,I,n){const o=PB[b],e=.02,NT=AT,n0=n;if(o.k=='piston'||o.k=='spiston')return emitPiston(b,x,y,z,P,C,U,I,n);
+function emitPB(b,x,y,z,P,C,U,I,n){const o=PB[b],e=.02,NT=AT,n0=n;if(o.k=='wire')return emitWire(b,x,y,z,P,C,U,I,n);if(o.k=='piston'||o.k=='spiston')return emitPiston(b,x,y,z,P,C,U,I,n);
  for(const q of o.bx){const[x0,y0,z0,x1,y1,z1]=q;
   for(let f=0;f<6;f++){const d=N[f];
    if((f==0&&x1==1)||(f==1&&x0==0)||(f==2&&y1==1)||(f==3&&y0==0)||(f==4&&z1==1)||(f==5&&z0==0)){const nb=get(x+d[0],y+d[1],z+d[2]);if(nb&&nb!=71&&!PB[nb])continue}
@@ -299,6 +299,7 @@ function emitPB(b,x,y,z,P,C,U,I,n){const o=PB[b],e=.02,NT=AT,n0=n;if(o.k=='pisto
  return n-n0}
 const meshes={};
 function emitPiston(b,x,y,z,P,C,U,I,n){const m=RED.get(rkey(x,y,z)),face=m?.face||0,sticky=b==248||b==253,turn=(a,c,w)=>face==0?[a,c,1-w]:face==1?[w,c,a]:face==2?[1-a,c,w]:[1-w,c,1-a],boxes=[[0,0,0,1,1,1,70]];if(m&&(m.extended||m.anim==1)){const p=m.anim?Math.max(0,Math.min(1,m.progress||0)):1,tip=.75+.25*p;boxes.push([.36,.36,.72,.64,.64,tip-.12,70],[.08,.08,tip-.12,.92,.92,tip,sticky?71:78])}const e=.02,n0=n;for(const q of boxes){const[x0,y0,w0,x1,y1,w1,t]=q;for(let f=0;f<6;f++){const d=N[f];if((f==0&&x1==1)||(f==1&&x0==0)||(f==2&&y1==1)||(f==3&&y0==0)||(f==4&&w1==1)||(f==5&&w0==0)){const nb=get(x+d[0],y+d[1],z+d[2]);if(nb&&nb!=71&&!PB[nb])continue}const tex=q[6]==70?(m?(f==4?76:70):(f==2?(sticky?71:76):70)):t;for(let k=0;k<4;k++){const a=x0+(x1-x0)*Q[f][k][0],c=y0+(y1-y0)*Q[f][k][1],w=w0+(w1-w0)*Q[f][k][2],[rx,ry,rz]=turn(a,c,w);P.push(x+rx,y+ry,z+rz);const sh=SH[f];C.push(sh,sh,sh);const u=f==0?rz:f==1?1-rz:(f==2||f==3)?rx:f==4?1-rx:rx,v=(f<2||f>3)?ry:f==2?rz:1-rz;U.push((tex+e+u*(1-2*e))/AT,e+v*(1-2*e))}I.push(n,n+1,n+2,n,n+2,n+3);n+=4}}return n-n0}
+function emitWire(b,x,y,z,P,C,U,I,n){const tileId=b==86?77:65,boxes=[[.39,.025,0,.61,.055,1],[0,.025,.39,1,.055,.61]],e=.02,n0=n;for(const q of boxes){const[x0,y0,z0,x1,y1,z1]=q;for(let f=0;f<6;f++){if(f!=2)continue;for(let k=0;k<4;k++){const c=Q[f][k],px=x0+(x1-x0)*c[0],py=y0+(y1-y0)*c[1],pz=z0+(z1-z0)*c[2];P.push(x+px,y+py+.002,z+pz);C.push(SH[f],SH[f],SH[f]);const u=k==0||k==1?0:1,v=k==0||k==3?0:1;U.push((tileId+e+u*(1-2*e))/AT,e+v*(1-2*e))}I.push(n,n+1,n+2,n,n+2,n+3);n+=4}}return n-n0}
 function build(cx,cz){
  const dd=chunks.get(ck(cx,cz));if(!dd)return;const gl=(xx,yy,zz)=>{const lx=xx-cx*CS,lz=zz-cz*CS;return lx>=0&&lx<CS&&lz>=0&&lz<CS&&yy>=-64&&yy<H?dd[((yy+64)*CS+lz)*CS+lx]:get(xx,yy,zz)};const P=[],C=[],U=[],I=[],P2=[],C2=[],U2=[],I2=[];let n=0,n2=0;const e=.02;
  for(let y=-64;y<H;y++)for(let z=cz*CS;z<cz*CS+CS;z++)for(let x=cx*CS;x<cx*CS+CS;x++){
@@ -584,7 +585,7 @@ SLM.forEach((mt,m)=>{const T=B[mt];for(let h=0;h<2;h++){const id=100+2*m+h;B[id]
  for(let f=0;f<4;f++)for(let h=0;h<2;h++){const id=130+8*m+f+(h?4:0);B[id]=T;PB[id]={k:'stair',m,mt,f,top:h,bx:stb(f,h),base:130+8*m};if(f||h)VAR.add(id);cp(id,mt)}});
  [[210,60,8,7],[226,62,39,21]].forEach(([b0,t0,ed,mt])=>{for(let up=0;up<2;up++)for(let f=0;f<4;f++)for(let o=0;o<2;o++){const id=b0+(up?8:0)+f*2+o;B[id]=[ed,ed,t0+up];PB[id]={k:'door',up,f,o,bx:[dbx(o?(f+3)&3:f)],base:b0,mt,tile:t0+up,edge:ed};if(id!=b0)VAR.add(id);HD[id]=b0==210?.8:3;PT[id]=b0==210?1:0;if(b0==226)NEED[id]=1}});
 const RBX=[[0,0,0,1,1,1]];
-PB[85]={k:'wire',base:85,bx:[[.08,.02,.08,.92,.06,.92]]};PB[86]={k:'wire',base:85,bx:[[.08,.02,.08,.92,.06,.92]]};VAR.add(86);
+PB[85]={k:'wire',base:85,bx:[[.39,.02,0,.61,.06,1],[0,.02,.39,1,.06,.61]]};PB[86]={k:'wire',base:85,bx:[[.39,.02,0,.61,.06,1],[0,.02,.39,1,.06,.61]]};VAR.add(86);
 PB[243]={k:'redblock',base:243,bx:RBX};PB[244]={k:'rtorch',base:244,bx:[[.42,0,.42,.58,.72,.58]]};
 PB[245]={k:'button',base:245,bx:[[.31,0,.31,.69,.12,.69]]};PB[246]={k:'lever',base:246,bx:[[.44,0,.44,.56,.56,.56]]};
 PB[247]={k:'piston',base:247,bx:RBX};PB[248]={k:'spiston',base:248,bx:RBX};PB[249]={k:'lamp',base:249,bx:RBX};PB[250]={k:'lamp',base:249,bx:RBX};
