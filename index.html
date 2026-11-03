@@ -303,7 +303,7 @@ function emitWire(b,x,y,z,P,C,U,I,n){const tileId=b==86?77:65,boxes=[[.39,.025,0
 function build(cx,cz){
  const dd=chunks.get(ck(cx,cz));if(!dd)return;const gl=(xx,yy,zz)=>{const lx=xx-cx*CS,lz=zz-cz*CS;return lx>=0&&lx<CS&&lz>=0&&lz<CS&&yy>=-64&&yy<H?dd[((yy+64)*CS+lz)*CS+lx]:get(xx,yy,zz)};const P=[],C=[],U=[],I=[],P2=[],C2=[],U2=[],I2=[];let n=0,n2=0;const e=.02;
  for(let y=-64;y<H;y++)for(let z=cz*CS;z<cz*CS+CS;z++)for(let x=cx*CS;x<cx*CS+CS;x++){
-  const b=dd[((y+64)*CS+(z&15))*CS+(x&15)];if(!b)continue;if(PB[b]){if(PB[b].k=='phead'||PB[b].k=='sphead')continue;n+=emitPB(b,x,y,z,P,C,U,I,n);continue}
+  const b=dd[((y+64)*CS+(z&15))*CS+(x&15)];if(!b)continue;if(PB[b]){if(PB[b].k=='phead'||PB[b].k=='sphead'||PB[b].k=='wire')continue;n+=emitPB(b,x,y,z,P,C,U,I,n);continue}
   for(let f=0;f<6;f++){const d=N[f],nb=gl(x+d[0],y+d[1],z+d[2]);if(b==71?nb:(nb&&nb!=71&&!PB[nb]))continue;
    const t=B[b][f==2?0:f==3?1:2],W=b==71,PP=W?P2:P,CC=W?C2:C,UU=W?U2:U,II=W?I2:I,nn=W?n2:n;
    for(let k=0;k<4;k++){const c=Q[f][k];PP.push(x+c[0],y+c[1],z+c[2]);CC.push(SH[f],SH[f],SH[f]);
@@ -416,7 +416,7 @@ function prime(bx,by,bz,t){const mesh=new THREE.Mesh(new THREE.BoxGeometry(1,1,1
 function updTnt(dt){for(let i=TNTS.length-1;i>=0;i--){const a=TNTS[i];a.t-=dt;a.mesh.material.color.setHex(Math.floor(a.t*6)%2?0xffffff:0xc83030);const s=1+Math.sin(a.t*20)*.04;a.mesh.scale.set(s,s,s);if(a.t<=0){scene.remove(a.mesh);a.mesh.geometry.dispose();a.mesh.material.dispose();TNTS.splice(i,1);explode(a.x,a.y,a.z,4)}}}
 function explode(x,y,z,pw){const R=Math.ceil(pw),D=new Set(),mk=(a,b)=>D.add((a>>4)+','+(b>>4));
  for(let a=-R;a<=R;a++)for(let b=-R;b<=R;b++)for(let c=-R;c<=R;c++){const d=Math.hypot(a,b,c);if(d>pw)continue;const bx=Math.floor(x)+a,by=Math.floor(y)+b,bz=Math.floor(z)+c,v=get(bx,by,bz);if(!v||v==71||v==84||v==14||by<=-64)continue;
-  if(Math.random()>1-d/pw*.6)continue;const ch=chunks.get(ck(bx>>4,bz>>4));if(!ch)continue;ch[((by+64)*CS+(bz&15))*CS+(bx&15)]=0;RED.delete(rkey(bx,by,bz));mod.add(ck(bx>>4,bz>>4));mk(bx,bz);mk(bx-1,bz);mk(bx+1,bz);mk(bx,bz-1);mk(bx,bz+1);
+  if(Math.random()>1-d/pw*.6)continue;const ch=chunks.get(ck(bx>>4,bz>>4));if(!ch)continue;ch[((by+64)*CS+(bz&15))*CS+(bx&15)]=0;RED.delete(rkey(bx,by,bz));syncWire(bx,by,bz,0);mod.add(ck(bx>>4,bz>>4));mk(bx,bz);mk(bx-1,bz);mk(bx+1,bz);mk(bx,bz-1);mk(bx,bz+1);
   if(v==60)prime(bx,by,bz,.3+Math.random()*.7)}
  D.forEach(k=>{const[a,b]=k.split(',').map(Number);build(a,b)});
  burst(x,y,z,()=>0x555555+((Math.random()*80)|0)*0x010101,36);
@@ -465,8 +465,9 @@ function stream(gb,mb,rd){
   for(const[k,v]of chunks)if(!mod.has(k)&&(v.cx-cx)**2+(v.cz-cz)**2>(rd+3)**2)chunks.delete(k)}}
 function spawn(){let sx=8,sz=8;for(let r=0;r<(wtype?0:400);r+=6){let f=0;for(let a=0;a<12&&!f;a++){const x=Math.round(8+Math.cos(a/12*6.283)*r),z=Math.round(8+Math.sin(a/12*6.283)*r);if(hgt(x,z)>=13&&bio(x,z)!=1){sx=x;sz=z;f=1}}if(f)break}
  P.x=sx+.5;P.z=sz+.5;P.y=H;P.vy=0;pcx=pcz=1e9;stream(1e9,1e9,1);let y=H-1;while(y>-64&&(!get(sx,y,sz)||get(sx,y,sz)==71))y--;P.y=y+1;fy=P.y}
-const RED=new Map(),rkey=(x,y,z)=>`${x},${y},${z}`;
-function setB(x,y,z,v){const cx=x>>4,cz=z>>4,c=chunks.get(ck(cx,cz));if(!c)return;RED.delete(rkey(x,y,z));c[((y+64)*CS+(z&15))*CS+(x&15)]=v;mod.add(ck(cx,cz));build(cx,cz);
+const RED=new Map(),rkey=(x,y,z)=>`${x},${y},${z}`,wireMeshes=new Map(),wireLoader=new THREE.TextureLoader();wireLoader.setCrossOrigin('anonymous');const wireTex=(url)=>{const t=wireLoader.load(url);t.magFilter=THREE.NearestFilter;t.minFilter=THREE.NearestFilter;t.generateMipmaps=false;return t},wireMatOff=new THREE.MeshBasicMaterial({map:wireTex('https://static.wikia.nocookie.net/minecraft_ko_gamepedia/images/a/ad/Inactive_Redstone_Wire_Cross.png/revision/latest?cb=20190403060726'),transparent:true,alphaTest:.02,side:THREE.DoubleSide,depthWrite:false}),wireMatOn=new THREE.MeshBasicMaterial({map:wireTex('https://minecraft.wiki/images/Active_Redstone_Wire_%28NESW%29_JE4.png?8d567'),transparent:true,alphaTest:.02,side:THREE.DoubleSide,depthWrite:false});
+function syncWire(x,y,z,id){const key=rkey(x,y,z),old=wireMeshes.get(key);if(old){scene.remove(old);old.geometry.dispose();wireMeshes.delete(key)}if(id!=85&&id!=86)return;const m=new THREE.Mesh(new THREE.PlaneGeometry(1,1),id==86?wireMatOn:wireMatOff);m.rotation.x=-Math.PI/2;m.position.set(x+.5,y+.027,z+.5);m.renderOrder=2;scene.add(m);wireMeshes.set(key,m)}
+function setB(x,y,z,v){const cx=x>>4,cz=z>>4,c=chunks.get(ck(cx,cz));if(!c)return;RED.delete(rkey(x,y,z));c[((y+64)*CS+(z&15))*CS+(x&15)]=v;syncWire(x,y,z,v);mod.add(ck(cx,cz));build(cx,cz);
  if((x&15)==0)build(cx-1,cz);if((x&15)==15)build(cx+1,cz);if((z&15)==0)build(cx,cz-1);if((z&15)==15)build(cx,cz+1)}
 // ui
 const bar=$('bar');
@@ -633,7 +634,7 @@ function pause(){if(state!='play')return;ui('pause');if(document.pointerLockElem
 function inv(){if(state=='inv'||state=='craft'){start();return}if(state!='play'&&state!='pause')return;CGN=2;$('pan').classList.remove('tbl');ui('inv');rinv();if(document.pointerLockElement)document.exitPointerLock()}
 function menu(){ui('menu');if(document.pointerLockElement)document.exitPointerLock()}
 let tj=0;function tapJump(){const n=performance.now();if(state=='play'&&creative&&n-tj<300){fly=!fly;P.vy=0}tj=n}
-function newWorld(){seed=Math.floor(Math.random()*1e4)+1;for(const k in meshes){scene.remove(meshes[k]);meshes[k].geometry.dispose();delete meshes[k]}MOBS.splice(0).forEach(m=>scene.remove(m.g));DR.splice(0).forEach(d=>scene.remove(d.m));ARR.splice(0).forEach(x=>scene.remove(x.mesh));TNTS.splice(0).forEach(x=>scene.remove(x.mesh));VC.clear();vdone.clear();PEND.length=0;chunks.clear();mod.clear();RED.clear();redClock=0;mkOff();spawn();applyMode()}
+function newWorld(){seed=Math.floor(Math.random()*1e4)+1;for(const k in meshes){scene.remove(meshes[k]);meshes[k].geometry.dispose();delete meshes[k]}wireMeshes.forEach(m=>{scene.remove(m);m.geometry.dispose()});wireMeshes.clear();MOBS.splice(0).forEach(m=>scene.remove(m.g));DR.splice(0).forEach(d=>scene.remove(d.m));ARR.splice(0).forEach(x=>scene.remove(x.mesh));TNTS.splice(0).forEach(x=>scene.remove(x.mesh));VC.clear();vdone.clear();PEND.length=0;chunks.clear();mod.clear();RED.clear();redClock=0;mkOff();spawn();applyMode()}
 let played=false,cm0=0,wt0=0;$('bplay').onclick=()=>{cm0=creative;wt0=wtype;$('wres').style.display=played?'':'none';document.body.classList.add('wcr')};
 $('wmode').onclick=()=>{creative=!creative;setLabels()};$('wtype').onclick=()=>{wtype=1-wtype;setLabels()};
 $('wgo').onclick=()=>{document.body.classList.remove('wcr');newWorld();played=true;start()};
