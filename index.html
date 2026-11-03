@@ -145,7 +145,7 @@ document.body.classList.toggle('t',touch);
 const W=48,H=32,CS=16,NC=W/CS;
 let data=new Uint8Array(W*H*W),seed=1;
 const idx=(x,y,z)=>(y*W+z)*W+x;
-let wtype=0,cur=[0,0],CGN=2,CGI=Array(9).fill(0),CGC=Array(9).fill(0),RD=3,creative=false,hp=20,food=20,sat=5,ex=0,ft=0,fy=0,sig='',prog=0,pk='',apples=0;const CNT=Array(9).fill(0),ST=Array(27).fill(0),SC=Array(27).fill(0),chunks=new Map(),mod=new Set();
+let wtype=0,cur=[0,0],CGN=2,CGI=Array(9).fill(0),CGC=Array(9).fill(0),RD=3,creative=false,hp=20,food=20,sat=5,ex=0,ft=0,fy=0,sig='',prog=0,pk='',apples=0,lavaBurn=0;const CNT=Array(9).fill(0),ST=Array(27).fill(0),SC=Array(27).fill(0),chunks=new Map(),mod=new Set();
 const ck=(a,b)=>(a+512)*1024+(b+512);
 const sg=i=>i>=100?[CGI[i-100],CGC[i-100]]:i<9?[HOT[i],CNT[i]]:[ST[i-9],SC[i-9]],ss=(i,id,c)=>{if(i>=100){CGI[i-100]=id;CGC[i-100]=c}else if(i<9){HOT[i]=id;CNT[i]=c}else{ST[i-9]=id;SC[i-9]=c}};
 const get=(x,y,z)=>{if(y<-64||y>=H)return 0;const c=chunks.get(ck(x>>4,z>>4));return c?c[((y+64)*CS+(z&15))*CS+(x&15)]:0};
@@ -191,7 +191,7 @@ function gen(){
     if(Math.abs(dx)+Math.abs(dz)+(dy==5?1:0)<4&&!data[idx(x+dx,h+dy,z+dz)])data[idx(x+dx,h+dy,z+dz)]=5;}}
 }
 // texture atlas
-const AT=80,ac=document.createElement('canvas');ac.width=AT*16;ac.height=16;const g=ac.getContext('2d');
+const AT=81,ac=document.createElement('canvas');ac.width=AT*16;ac.height=16;const g=ac.getContext('2d');
 function tile(t,f){for(let y=0;y<16;y++)for(let x=0;x<16;x++){const r=f(x,y),n=(Math.random()-.5)*r[1],c=r[0];
  g.fillStyle=`rgb(${c[0]+n|0},${c[1]+n|0},${c[2]+n|0})`;g.fillRect(t*16+x,y,1,1);}}
 const GR=[95,160,60],DI=[134,96,67];
@@ -242,6 +242,7 @@ tile(75,(x,y)=>((x-7)**2+(y-8)**2<12||((x+3*y)%11<2))?[[195,34,39],24]:[[105,105
 tile(76,(x,y)=>((x<4||x>11)&&(y<4||y>11))?[[178,178,180],18]:(x<2||y<2||x>13||y>13)?[[87,69,48],12]:((x%5==0)?[[137,104,67],12]:[[191,161,119],15]));
 tile(77,(x,y)=>((x+y)%5==0)?[[218,48,40],22]:[[249,77,56],28]);
 tile(78,(x,y)=>x<2||y<2||x>13||y>13?[[190,190,194],8]:[[235,235,238],14]);tile(79,(x,y)=>x>=7&&x<=8&&y>=2&&y<=12?[[235,55,45],20]:[[115,72,36],12]);
+tile(80,(x,y)=>{const w=Math.sin(x*.62+Math.sin(y*.38)*2)+Math.cos(y*.72-x*.18);return w>.85?[[255,222,79],22]:w>.15?[[255,132,29],25]:[[190,42,13],24]});
 const IT=['#a0753f','#8d8d8d','#e8e8e8','#4de4e0'];
 const ic=document.createElement('canvas');ic.width=624;ic.height=16;const ig=ic.getContext('2d');
 function icon(i,L){const S=new Set();L.forEach(([p])=>p.forEach(([x,y])=>S.add(x+','+y)));ig.fillStyle='#1b1b1b';
@@ -268,8 +269,8 @@ bmp(1,['','','..........AA','.......AAABBC','....AAABDDDDEC','.AAABDDDDDDDFBG','
 bmp(33,['......AAA','.....ABBBA','...AABCDDEAA','..FCCCCDEFGGA','..ABBCBDEFHHI','.ABCCBJDEGHHFI','.ABJJJBBJHHHGI','.ABJJJBCJEEEFI','.ABJJJBCJEHHGI','.AJJJJCJJEHHFI','.AJDDJJJJGFFFI','..AEEDEEGFFFI','..FGHDEEGFFFA','...AAEEEFFII','.....IHHGI','......III'],{'A':'#235115','B':'#c4f3d1','C':'#abeebc','D':'#74d782','E':'#4ba446','F':'#367a2c','G':'#408e38','H':'#44973e','I':'#17380f','J':'#82e895'});
 bmp(2,['.....AAAAA','....ABBBBBA','...CCDDDDDECD','..DABFFFFDGHF','.AIBDFFDBJJAF','.AIBFBDDDDJGEH','HBDFBJFFFFCJEH','ABDFDFFFFFCJGGA','ABDFDFFFFFCJGGA','ABBDGFFFFFCEEEH','HBDJJCCCCCGGCCA','.AIJEGGGGGEGEA','.AIGEGGGGGECIA','.CCEEGGGGGEECC','..FHCGGGGGCHF','....AAAAAAA'],{'A':'#18342f','B':'#f5f7f6','C':'#5b9c8f','D':'#d5f2ed','E':'#3b7065','F':'#b6e6dd','G':'#63c5ae','H':'#18332e','I':'#243f3a','J':'#8be4d2'});
 const meat=(i,c)=>{const p=[];for(let y=3;y<=12;y++)for(let x=2;x<=13;x++)if(((x-7.5)/5.5)**2+((y-7.5)/4.5)**2<=1)p.push([x,y]);icon(i,[[p,c],[[[11,5],[12,4],[13,3]],'#f4f4f4']])};meat(23,'#f2a1a8');meat(24,'#b5403a');meat(25,'#f0c9a0');meat(26,'#c9605a');meat(27,'#a8602c');meat(28,'#7a3a22');meat(29,'#d99a4a');meat(30,'#8a4a32');icon(31,[[Array.from({length:40},(_,k)=>[4+k%8,6+(k/8|0)]),'#f5d442']]);icon(32,[[(()=>{const a=[];for(let y=4;y<=12;y++)for(let x=4;x<=12;x++)if((x-8)**2+(y-8)**2<=16)a.push([x,y]);return a})(),'#262626'],[[[6,6],[7,6],[6,7]],'#666']]);
-const B={1:[0,2,1],2:[2,2,2],3:[3,3,3],4:[5,5,4],5:[6,6,6],6:[7,7,7],7:[8,8,8],8:[9,9,9],9:[10,10,10],10:[11,11,11],11:[12,12,12],12:[13,13,13],13:[14,14,14],14:[15,15,15],15:[16,16,16],16:[17,17,17],17:[18,8,19],50:[20,20,20],51:[21,21,21],52:[22,22,22],53:[23,23,23],54:[24,24,24],55:[25,25,25],56:[26,26,26],57:[27,27,27],58:[28,28,28],59:[8,8,29],60:[31,31,30],61:[32,32,32],62:[33,33,33],63:[34,34,34],64:[35,35,35],65:[36,36,36],66:[37,37,37],67:[38,38,38],68:[39,39,39],69:[40,40,40],70:[42,42,41],71:[43,43,43],72:[45,45,44],73:[46,46,46],74:[47,47,47],75:[49,49,48],76:[50,50,50],77:[51,51,51],78:[53,53,52],79:[54,54,54],80:[55,55,55],81:[57,57,56],82:[58,58,58],83:[59,59,59],84:[64,64,64],85:[65,65,65],86:[77,77,77],242:[75,75,75],243:[66,66,66],244:[67,67,67],245:[68,68,68],246:[69,69,69],247:[76,70,70],248:[71,70,70],249:[72,72,44],250:[73,73,44],251:[74,74,74],252:[76,70,70],253:[71,70,70],254:[76,76,76],255:[76,76,76]};
-const RNAME={85:['레드스톤 가루','Redstone Dust'],242:['레드스톤 광석','Redstone Ore'],243:['레드스톤 블록','Redstone Block'],244:['레드스톤 횃불','Redstone Torch'],245:['돌 버튼','Stone Button'],246:['레버','Lever'],247:['피스톤','Piston'],248:['끈끈이 피스톤','Sticky Piston'],249:['레드스톤 램프','Redstone Lamp'],250:['레드스톤 램프','Redstone Lamp'],251:['돌 압력판','Stone Pressure Plate'],252:['피스톤','Piston'],253:['끈끈이 피스톤','Sticky Piston'],254:['피스톤 헤드','Piston Head'],255:['끈끈이 피스톤 헤드','Sticky Piston Head']};
+const B={1:[0,2,1],2:[2,2,2],3:[3,3,3],4:[5,5,4],5:[6,6,6],6:[7,7,7],7:[8,8,8],8:[9,9,9],9:[10,10,10],10:[11,11,11],11:[12,12,12],12:[13,13,13],13:[14,14,14],14:[15,15,15],15:[16,16,16],16:[17,17,17],17:[18,8,19],50:[20,20,20],51:[21,21,21],52:[22,22,22],53:[23,23,23],54:[24,24,24],55:[25,25,25],56:[26,26,26],57:[27,27,27],58:[28,28,28],59:[8,8,29],60:[31,31,30],61:[32,32,32],62:[33,33,33],63:[34,34,34],64:[35,35,35],65:[36,36,36],66:[37,37,37],67:[38,38,38],68:[39,39,39],69:[40,40,40],70:[42,42,41],71:[43,43,43],72:[45,45,44],73:[46,46,46],74:[47,47,47],75:[49,49,48],76:[50,50,50],77:[51,51,51],78:[53,53,52],79:[54,54,54],80:[55,55,55],81:[57,57,56],82:[58,58,58],83:[59,59,59],84:[64,64,64],85:[65,65,65],86:[77,77,77],87:[80,80,80],242:[75,75,75],243:[66,66,66],244:[67,67,67],245:[68,68,68],246:[69,69,69],247:[76,70,70],248:[71,70,70],249:[72,72,44],250:[73,73,44],251:[74,74,74],252:[76,70,70],253:[71,70,70],254:[76,76,76],255:[76,76,76]};
+const RNAME={85:['레드스톤 가루','Redstone Dust'],87:['용암','Lava'],242:['레드스톤 광석','Redstone Ore'],243:['레드스톤 블록','Redstone Block'],244:['레드스톤 횃불','Redstone Torch'],245:['돌 버튼','Stone Button'],246:['레버','Lever'],247:['피스톤','Piston'],248:['끈끈이 피스톤','Sticky Piston'],249:['레드스톤 램프','Redstone Lamp'],250:['레드스톤 램프','Redstone Lamp'],251:['돌 압력판','Stone Pressure Plate'],252:['피스톤','Piston'],253:['끈끈이 피스톤','Sticky Piston'],254:['피스톤 헤드','Piston Head'],255:['끈끈이 피스톤 헤드','Sticky Piston Head']};
 const HOT=[1,2,3,4,7,6,5,8,9];
 const tex=new THREE.CanvasTexture(ac);tex.magFilter=tex.minFilter=THREE.NearestFilter;tex.generateMipmaps=false;
 // scene
@@ -280,7 +281,7 @@ const scene=new THREE.Scene();scene.background=new THREE.Color(sky);scene.fog=ne
 const cam=new THREE.PerspectiveCamera(70,1,.1,200);cam.rotation.order='YXZ';
 function rs(){R.setSize(innerWidth,innerHeight);cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix()}
 addEventListener('resize',rs);rs();
-const mat=new THREE.MeshBasicMaterial({map:tex,vertexColors:true}),waterClock={value:0},wmat=new THREE.MeshBasicMaterial({map:tex,vertexColors:true,transparent:true,opacity:.78,depthWrite:false});wmat.onBeforeCompile=s=>{s.uniforms.uWaterTime=waterClock;s.vertexShader=s.vertexShader.replace('#include <common>','#include <common>\nuniform float uWaterTime;').replace('#include <begin_vertex>','#include <begin_vertex>\ntransformed.y+=sin(position.x*1.8+uWaterTime*.8)*.018+cos(position.z*1.7-uWaterTime*.65)*.014;')};
+const mat=new THREE.MeshBasicMaterial({map:tex,vertexColors:true}),waterClock={value:0},wmat=new THREE.MeshBasicMaterial({map:tex,vertexColors:true,transparent:true,opacity:.78,depthWrite:false}),lmat=new THREE.MeshBasicMaterial({map:tex,vertexColors:true,transparent:true,opacity:.96,depthWrite:false});const fluidShader=(material,amp,rate)=>material.onBeforeCompile=s=>{s.uniforms.uWaterTime=waterClock;s.vertexShader=s.vertexShader.replace('#include <common>','#include <common>\nuniform float uWaterTime;').replace('#include <begin_vertex>',`#include <begin_vertex>\ntransformed.y+=sin(position.x*1.8+uWaterTime*.8)*${amp}+cos(position.z*1.7-uWaterTime*.65)*${amp*.75};`)};fluidShader(wmat,.018,.8);fluidShader(lmat,.012,.65);
 const N=[[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1],[0,0,-1]];
 const Q=[[[1,0,0],[1,1,0],[1,1,1],[1,0,1]],[[0,0,1],[0,1,1],[0,1,0],[0,0,0]],[[0,1,0],[0,1,1],[1,1,1],[1,1,0]],
 [[0,0,1],[0,0,0],[1,0,0],[1,0,1]],[[1,0,1],[1,1,1],[0,1,1],[0,0,1]],[[0,0,0],[0,1,0],[1,1,0],[1,0,0]]];
@@ -301,14 +302,14 @@ const meshes={};
 function emitPiston(b,x,y,z,P,C,U,I,n){const m=RED.get(rkey(x,y,z)),face=m?.face||0,sticky=b==248||b==253,turn=(a,c,w)=>face==0?[a,c,1-w]:face==1?[w,c,a]:face==2?[1-a,c,w]:[1-w,c,1-a],boxes=[[0,0,0,1,1,1,70]];if(m&&(m.extended||m.anim==1)){const p=m.anim?Math.max(0,Math.min(1,m.progress||0)):1,tip=.75+.25*p;boxes.push([.36,.36,.72,.64,.64,tip-.12,70],[.08,.08,tip-.12,.92,.92,tip,sticky?71:78])}const e=.02,n0=n;for(const q of boxes){const[x0,y0,w0,x1,y1,w1,t]=q;for(let f=0;f<6;f++){const d=N[f];if((f==0&&x1==1)||(f==1&&x0==0)||(f==2&&y1==1)||(f==3&&y0==0)||(f==4&&w1==1)||(f==5&&w0==0)){const nb=get(x+d[0],y+d[1],z+d[2]);if(nb&&nb!=71&&!PB[nb])continue}const tex=q[6]==70?(m?(f==4?76:70):(f==2?(sticky?71:76):70)):t;for(let k=0;k<4;k++){const a=x0+(x1-x0)*Q[f][k][0],c=y0+(y1-y0)*Q[f][k][1],w=w0+(w1-w0)*Q[f][k][2],[rx,ry,rz]=turn(a,c,w);P.push(x+rx,y+ry,z+rz);const sh=SH[f];C.push(sh,sh,sh);const u=f==0?rz:f==1?1-rz:(f==2||f==3)?rx:f==4?1-rx:rx,v=(f<2||f>3)?ry:f==2?rz:1-rz;U.push((tex+e+u*(1-2*e))/AT,e+v*(1-2*e))}I.push(n,n+1,n+2,n,n+2,n+3);n+=4}}return n-n0}
 function emitWire(b,x,y,z,P,C,U,I,n){const tileId=b==86?77:65,boxes=[[.39,.025,0,.61,.055,1],[0,.025,.39,1,.055,.61]],e=.02,n0=n;for(const q of boxes){const[x0,y0,z0,x1,y1,z1]=q;for(let f=0;f<6;f++){if(f!=2)continue;for(let k=0;k<4;k++){const c=Q[f][k],px=x0+(x1-x0)*c[0],py=y0+(y1-y0)*c[1],pz=z0+(z1-z0)*c[2];P.push(x+px,y+py+.002,z+pz);C.push(SH[f],SH[f],SH[f]);const u=k==0||k==1?0:1,v=k==0||k==3?0:1;U.push((tileId+e+u*(1-2*e))/AT,e+v*(1-2*e))}I.push(n,n+1,n+2,n,n+2,n+3);n+=4}}return n-n0}
 function build(cx,cz){
- const dd=chunks.get(ck(cx,cz));if(!dd)return;const gl=(xx,yy,zz)=>{const lx=xx-cx*CS,lz=zz-cz*CS;return lx>=0&&lx<CS&&lz>=0&&lz<CS&&yy>=-64&&yy<H?dd[((yy+64)*CS+lz)*CS+lx]:get(xx,yy,zz)};const P=[],C=[],U=[],I=[],P2=[],C2=[],U2=[],I2=[];let n=0,n2=0;const e=.02;
+ const dd=chunks.get(ck(cx,cz));if(!dd)return;const gl=(xx,yy,zz)=>{const lx=xx-cx*CS,lz=zz-cz*CS;return lx>=0&&lx<CS&&lz>=0&&lz<CS&&yy>=-64&&yy<H?dd[((yy+64)*CS+lz)*CS+lx]:get(xx,yy,zz)};const P=[],C=[],U=[],I=[],P2=[],C2=[],U2=[],I2=[],P3=[],C3=[],U3=[],I3=[];let n=0,n2=0,n3=0;const e=.02;
  for(let y=-64;y<H;y++)for(let z=cz*CS;z<cz*CS+CS;z++)for(let x=cx*CS;x<cx*CS+CS;x++){
   const b=dd[((y+64)*CS+(z&15))*CS+(x&15)];if(!b)continue;if(PB[b]){if(PB[b].k=='phead'||PB[b].k=='sphead'||PB[b].k=='wire')continue;n+=emitPB(b,x,y,z,P,C,U,I,n);continue}
-  for(let f=0;f<6;f++){const d=N[f],nb=gl(x+d[0],y+d[1],z+d[2]);if(b==71?nb:(nb&&nb!=71&&!PB[nb]))continue;
-   const t=B[b][f==2?0:f==3?1:2],W=b==71,PP=W?P2:P,CC=W?C2:C,UU=W?U2:U,II=W?I2:I,nn=W?n2:n;
+  for(let f=0;f<6;f++){const d=N[f],nb=gl(x+d[0],y+d[1],z+d[2]);if(b==71||b==87?nb:(nb&&nb!=71&&nb!=87&&!PB[nb]))continue;
+   const t=B[b][f==2?0:f==3?1:2],W=b==71,L=b==87,PP=W?P2:L?P3:P,CC=W?C2:L?C3:C,UU=W?U2:L?U3:U,II=W?I2:L?I3:I,nn=W?n2:L?n3:n;
    for(let k=0;k<4;k++){const c=Q[f][k];PP.push(x+c[0],y+c[1],z+c[2]);CC.push(SH[f],SH[f],SH[f]);
      UU.push((t+(UV[k][0]?1-e:e))/AT,UV[k][1]?1-e:e);}
-   II.push(nn,nn+1,nn+2,nn,nn+2,nn+3);if(W)n2+=4;else n+=4;}}
+   II.push(nn,nn+1,nn+2,nn,nn+2,nn+3);if(W)n2+=4;else if(L)n3+=4;else n+=4;}}
  const k=ck(cx,cz);let m=meshes[k];
  if(!m){m=meshes[k]=new THREE.Mesh(new THREE.BufferGeometry(),mat);m.frustumCulled=false;m.userData={cx,cz};scene.add(m)}
  m.geometry.dispose();const G=new THREE.BufferGeometry();
@@ -316,7 +317,9 @@ function build(cx,cz){
  G.setAttribute('color',new THREE.Float32BufferAttribute(C,3));
  G.setAttribute('uv',new THREE.Float32BufferAttribute(U,2));G.setIndex(I);m.geometry=G;
  if(m.userData.w){m.remove(m.userData.w);m.userData.w.geometry.dispose();m.userData.w=null}
+ if(m.userData.l){m.remove(m.userData.l);m.userData.l.geometry.dispose();m.userData.l=null}
  if(P2.length){const G2=new THREE.BufferGeometry();G2.setAttribute('position',new THREE.Float32BufferAttribute(P2,3));G2.setAttribute('color',new THREE.Float32BufferAttribute(C2,3));G2.setAttribute('uv',new THREE.Float32BufferAttribute(U2,2));G2.setIndex(I2);const wm=new THREE.Mesh(G2,wmat);wm.frustumCulled=false;m.add(wm);m.userData.w=wm}
+ if(P3.length){const G3=new THREE.BufferGeometry();G3.setAttribute('position',new THREE.Float32BufferAttribute(P3,3));G3.setAttribute('color',new THREE.Float32BufferAttribute(C3,3));G3.setAttribute('uv',new THREE.Float32BufferAttribute(U3,2));G3.setIndex(I3);const lm=new THREE.Mesh(G3,lmat);lm.frustumCulled=false;m.add(lm);m.userData.l=lm}
 }
 const buildAll=()=>{for(let a=0;a<NC;a++)for(let b=0;b<NC;b++)build(a,b)};
 function setB(x,y,z,v){data[idx(x,y,z)]=v;const cx=x>>4,cz=z>>4;build(cx,cz);
@@ -449,8 +452,8 @@ $('chi').onkeydown=e=>{e.stopPropagation();if(e.key=='Enter'){const v=$('chi').v
 $('tchat').onpointerdown=e=>{e.stopPropagation();openChat('')};
 // player
 const P={x:W/2,y:20,z:W/2,vy:0,g:false};let yaw=0,pitch=0,third=false,fly=false,fov=70,sel=0;
-function solid(x,y,z){if(y<-64)return true;if(y>=H)return false;const c=chunks.get(ck(x>>4,z>>4));if(!c)return true;const v=c[((y+64)*CS+(z&15))*CS+(x&15)];return v>0&&v!=71&&!(v>209&&v<242&&(v&1))}
-function topOf(a,b,c,X0,Y0,Z0,X1,Y1,Z1){if(b<-64)return -63;if(b>=H)return -1e9;const ch=chunks.get(ck(a>>4,c>>4));if(!ch)return b+1;const v=ch[((b+64)*CS+(c&15))*CS+(a&15)];if(!v||v==71)return -1e9;const o=PB[v];if(!o)return b+1;let t=-1e9;for(const q of o.bx)if(X1>a+q[0]&&X0<a+q[3]&&Y1>b+q[1]&&Y0<b+q[4]&&Z1>c+q[2]&&Z0<c+q[5])t=Math.max(t,b+q[4]);return t}
+function solid(x,y,z){if(y<-64)return true;if(y>=H)return false;const c=chunks.get(ck(x>>4,z>>4));if(!c)return true;const v=c[((y+64)*CS+(z&15))*CS+(x&15)];return v>0&&v!=71&&v!=87&&!(v>209&&v<242&&(v&1))}
+function topOf(a,b,c,X0,Y0,Z0,X1,Y1,Z1){if(b<-64)return -63;if(b>=H)return -1e9;const ch=chunks.get(ck(a>>4,c>>4));if(!ch)return b+1;const v=ch[((b+64)*CS+(c&15))*CS+(a&15)];if(!v||v==71||v==87)return -1e9;const o=PB[v];if(!o)return b+1;let t=-1e9;for(const q of o.bx)if(X1>a+q[0]&&X0<a+q[3]&&Y1>b+q[1]&&Y0<b+q[4]&&Z1>c+q[2]&&Z0<c+q[5])t=Math.max(t,b+q[4]);return t}
 function hit(x,y,z){const r=.3;
  for(let a=Math.floor(x-r);a<=Math.floor(x+r);a++)for(let b=Math.floor(y);b<=Math.floor(y+1.79);b++)for(let c=Math.floor(z-r);c<=Math.floor(z+r);c++)if(topOf(a,b,c,x-r,y,z-r,x+r,y+1.79,z+r)>-1e8)return true;return false}
 function gtop(x,y,z){const r=.3;let m=-1e9;for(let a=Math.floor(x-r);a<=Math.floor(x+r);a++)for(let b=Math.floor(y);b<=Math.floor(y+1.79);b++)for(let c=Math.floor(z-r);c<=Math.floor(z+r);c++)m=Math.max(m,topOf(a,b,c,x-r,y,z-r,x+r,y+1.79,z+r));return m>-1e8?m:y}
@@ -494,16 +497,17 @@ function hearts(){const h=[],f=[];for(let i=0;i<10;i++){const a=Math.max(0,Math.
 function msg(t){const m=$('msg');m.textContent=t;clearTimeout(msg.t);msg.t=setTimeout(()=>m.textContent='',2000)}
 function stat(){$('te').textContent='🍎'+apples}
 function dmg(n){hp=Math.max(0,hp-n);const h=$('hurt');h.style.opacity=.5;setTimeout(()=>h.style.opacity=0,150);if(hp<=0)die();hearts()}
-function die(){msg(tr('died'));hp=20;food=20;sat=5;spawn();hearts()}
+function die(){msg(tr('died'));hp=20;food=20;sat=5;lavaBurn=0;spawn();hearts()}
 const FD={23:4,24:4,25:3,26:3,90:8,91:8,92:6,93:6};
 function eat(){if(creative||food>=20)return;const id=HOT[sel];if(FD[id]){food=Math.min(20,food+FD[id]);sat=Math.min(20,sat+2);if(--CNT[sel]<=0)HOT[sel]=0;rbar();hearts();return}if(apples<1)return;apples--;food=Math.min(20,food+4);sat=Math.min(20,sat+2.4);stat();hearts()}
 function give(id,n=1){if(id==5&&Math.random()<.25){apples++;stat()}if(id==3)id=8;if(id==1)id=2;if(id==16)id=22;if(id==52)id=95;let j=id>=30&&id<50?-1:HOT.indexOf(id);if(j<0)j=HOT.indexOf(0);if(j<0){let k=stk(id)?ST.indexOf(id):-1;if(k<0)k=ST.indexOf(0);if(k<0){msg(tr('full'));return}ST[k]=id;SC[k]+=n;rbar();return}HOT[j]=id;CNT[j]+=n;rbar()}
 function surv(dt){
+ const lx=Math.floor(P.x),ly=Math.floor(P.y+.15),lz=Math.floor(P.z);if(get(lx,ly,lz)==87||get(lx,ly+1,lz)==87){lavaBurn+=dt;if(lavaBurn>=.8){lavaBurn=0;dmg(2)}}else lavaBurn=0;
  if(ex>=4){ex-=4;if(sat>0)sat=Math.max(0,sat-1);else food=Math.max(0,food-1)}
  if(food>=18&&hp<20){ft+=dt;if(ft>=4){ft=0;hp=Math.min(20,hp+1);ex+=.6}}else if(food<=0){ft+=dt;if(ft>=4){ft=0;if(hp>1)dmg(1)}}else ft=0;
  if(P.g){if(fy-P.y>3)dmg(Math.ceil(fy-P.y-3));fy=P.y}else fy=Math.max(fy,P.y);
  const s=hp+'|'+food;if(s!=sig){sig=s;hearts()}}
-function applyMode(){document.body.classList.toggle('sv',!creative);if(!creative)fly=false;hp=20;food=20;sat=5;ex=0;ft=0;sig='';apples=0;stat();
+function applyMode(){document.body.classList.toggle('sv',!creative);if(!creative)fly=false;hp=20;food=20;sat=5;ex=0;ft=0;sig='';lavaBurn=0;apples=0;stat();
  ST.fill(0);SC.fill(0);cur=[0,0];if(creative){HOT.splice(0,9,1,2,3,4,7,6,5,8,9);CNT.fill(64)}else{HOT.fill(0);CNT.fill(0)}rbar();pick(sel);hearts()}
 const HPAT=['.XX.XX.','XXXXXXX','XXXXXXX','.XXXXX.','..XXX..','...X...'];
 const HS=[0,1,2].map(s=>`<svg viewBox="0 0 7 6" width="19" height="17" shape-rendering="crispEdges" style="filter:drop-shadow(1px 0 #000) drop-shadow(-1px 0 #000) drop-shadow(0 1px #000) drop-shadow(0 -1px #000)">`+HPAT.map((r,y)=>[...r].map((c,x)=>c=='X'?`<rect x="${x}" y="${y}" width="1" height="1" fill="${s==2||(s==1&&x<4)?(y==1&&x==1?'#fff':'#e8262a'):'#3a1414'}"/>`:'').join('')).join('')+'</svg>');
@@ -685,7 +689,7 @@ function act(del){if(state=='play'&&!del){const v=villAt();if(v){openTrade(v);re
  if(!del&&PB[get(...tgt.c)]&&PB[get(...tgt.c)].k=='door'&&!keys.shift){toggleDoor(...tgt.c);return}
  if(!del&&redstoneUse(...tgt.c))return;
  if(!del&&get(...tgt.c)==60&&HOT[sel]==29){const[x,y,z]=tgt.c;setB(x,y,z,0);prime(x,y,z,3.2);if(swT<0)swT=0;return}
- if(del){const[x,y,z]=tgt.c,id=get(x,y,z);if(id&&y>-64){const po=PB[id];setB(x,y,z,0);if(po&&po.k=='door'){const yy=po.up?y-1:y+1,v=get(x,yy,z);if(PB[v]&&PB[v].k=='door')setB(x,yy,z,0)}burst(x+.5,y+.5,z+.5,()=>bcol(id),12);if(swT<0)swT=0;if(!creative&&drops(id)){if(id==242)give(85,4+Math.floor(Math.random()*3));else give(id==50&&Math.random()<.15?28:(po?po.base:id))}}}
+ if(del){const[x,y,z]=tgt.c,id=get(x,y,z);if(id&&y>-64){const po=PB[id];setB(x,y,z,0);if(po&&po.k=='door'){const yy=po.up?y-1:y+1,v=get(x,yy,z);if(PB[v]&&PB[v].k=='door')setB(x,yy,z,0)}burst(x+.5,y+.5,z+.5,()=>bcol(id),12);if(swT<0)swT=0;if(!creative&&id!=87&&drops(id)){if(id==242)give(85,4+Math.floor(Math.random()*3));else give(id==50&&Math.random()<.15?28:(po?po.base:id))}}}
  else if(tgt.p){const[x,y,z]=tgt.p;
   const r=.3;if(P.x+r>x&&P.x-r<x+1&&P.z+r>z&&P.z-r<z+1&&P.y+1.8>y&&P.y<y+1)return;if(!HOT[sel]||!B[HOT[sel]])return;if(placeB(x,y,z,HOT[sel]))return;if(swT<0)swT=0;if(!creative){if(--CNT[sel]<=0)HOT[sel]=0;rbar()}}}
 // loop
