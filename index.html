@@ -435,7 +435,7 @@ function say(t){const L=$('chlog'),d=document.createElement('div');d.textContent
 function openChat(pre){if(state!='play')return;ui('chat');document.body.classList.add('chat');const i=$('chi');i.value=pre||'';for(const k in keys)keys[k]=false;brk=false;jx=jy=0;if(document.pointerLockElement)document.exitPointerLock();setTimeout(()=>i.focus(),40)}
 function closeChat(){document.body.classList.remove('chat');$('chi').blur();if(state=='chat')start()}
 function setMode(c){creative=c;document.body.classList.toggle('sv',!c);if(!c)fly=false;else{hp=20;food=20}stat();hearts();rbar();setLabels()}
-function findItem(q){q=q.toLowerCase();if(/^\d+$/.test(q))return +q;const ids=[...Object.keys(B).map(Number).filter(i=>!VAR.has(i)&&i!=84),20,21,22,23,24,25,26,27,28,29,90,91,92,93,94,95,96,97,98,...Array.from({length:20},(_,k)=>30+k)];
+function findItem(q){q=q.toLowerCase();if(/^\d+$/.test(q))return +q;const ids=[...Object.keys(B).map(Number).filter(i=>!VAR.has(i)&&i!=84&&i!=88),20,21,22,23,24,25,26,27,28,29,90,91,92,93,94,95,96,97,98,...Array.from({length:20},(_,k)=>30+k)];
  const en=i=>RNAME[i]?RNAME[i][1].toLowerCase():i>=30&&i<50?LX.en[LK.indexOf('tool')].replace('{t}',LX.en[LK.indexOf('tier'+((i-30)/5|0))]).replace('{y}',LX.en[LK.indexOf('ty'+((i-30)%5))]).toLowerCase():(LX.en[LK.indexOf('n'+i)]||'').toLowerCase();
  return ids.find(i=>nm(i).toLowerCase()==q||en(i)==q)||ids.find(i=>nm(i).toLowerCase().includes(q)||en(i).includes(q))||0}
 function runCmd(v){if(v[0]!='/'){say('<You> '+v);return}const a=v.slice(1).trim().split(/\s+/),c=a[0].toLowerCase();
