@@ -298,7 +298,7 @@ function emitPB(b,x,y,z,P,C,U,I,n){const o=PB[b],e=.02,NT=AT,n0=n;if(o.k=='wire'
  for(const q of o.bx){const[x0,y0,z0,x1,y1,z1]=q;
   for(let f=0;f<6;f++){const d=N[f];
    if((f==0&&x1==1)||(f==1&&x0==0)||(f==2&&y1==1)||(f==3&&y0==0)||(f==4&&z1==1)||(f==5&&z0==0)){const nb=get(x+d[0],y+d[1],z+d[2]);if(nb&&nb!=71&&!PB[nb])continue}
-    let t;if(o.k=='bed')t=q===o.bx[1]?12:B[b][f==2?0:f==3?1:2];else if(o.k=='chest'&&q===o.bx[2])t=11;else if(o.k=='door'){ const br=(x1-x0<.5&&f<2)||(z1-z0<.5&&f>3);t=br?o.tile:o.edge}else if(o.k=='button'&&RED.get(rkey(x,y,z))?.until>0)t=78;else if(o.k=='lever'&&RED.get(rkey(x,y,z))?.on)t=79;else t=B[b][f==2?0:f==3?1:2];
+    let t;if(o.k=='bed')t=q===o.bx[1]?12:q===o.bx[0]?13:8;else if(o.k=='chest'&&q===o.bx[2])t=11;else if(o.k=='door'){ const br=(x1-x0<.5&&f<2)||(z1-z0<.5&&f>3);t=br?o.tile:o.edge}else if(o.k=='button'&&RED.get(rkey(x,y,z))?.until>0)t=78;else if(o.k=='lever'&&RED.get(rkey(x,y,z))?.on)t=79;else t=B[b][f==2?0:f==3?1:2];
    for(let k=0;k<4;k++){const c=Q[f][k],px=x0+(x1-x0)*c[0],py=y0+(y1-y0)*c[1],pz=z0+(z1-z0)*c[2];
     P.push(x+px,y+py,z+pz);C.push(SH[f],SH[f],SH[f]);
     const u=f==0?pz:f==1?1-pz:(f==2||f==3)?px:f==4?1-px:px,v=(f<2||f>3)?py:f==2?pz:1-pz;
@@ -601,7 +601,7 @@ const dbx=f=>[[0,0,0,1,1,.1875],[.8125,0,0,1,1,1],[0,0,.8125,1,1,1],[0,0,0,.1875
 SLM.forEach((mt,m)=>{const T=B[mt];for(let h=0;h<2;h++){const id=100+2*m+h;B[id]=T;PB[id]={k:'slab',m,mt,top:h,bx:[h?[0,.5,0,1,1,1]:[0,0,0,1,.5,1]],base:100+2*m};if(h)VAR.add(id);cp(id,mt)}
  for(let f=0;f<4;f++)for(let h=0;h<2;h++){const id=130+8*m+f+(h?4:0);B[id]=T;PB[id]={k:'stair',m,mt,f,top:h,bx:stb(f,h),base:130+8*m};if(f||h)VAR.add(id);cp(id,mt)}});
  [[210,60,8,7],[226,62,39,21]].forEach(([b0,t0,ed,mt])=>{for(let up=0;up<2;up++)for(let f=0;f<4;f++)for(let o=0;o<2;o++){const id=b0+(up?8:0)+f*2+o;B[id]=[ed,ed,t0+up];PB[id]={k:'door',up,f,o,bx:[dbx(o?(f+3)&3:f)],base:b0,mt,tile:t0+up,edge:ed};if(id!=b0)VAR.add(id);HD[id]=b0==210?.8:3;PT[id]=b0==210?1:0;if(b0==226)NEED[id]=1}});
-PB[256]={k:'plant',base:256,bx:[]};PB[257]={k:'plant',base:257,bx:[]};PB[258]={k:'plant',base:258,bx:[]};PB[259]={k:'bed',base:259,bx:[[.05,.16,.05,.95,.42,.95],[.08,.42,.08,.36,.54,.92]]};PB[260]={k:'chest',base:260,bx:[[.08,0,.08,.92,.76,.92],[.08,.76,.08,.92,.9,.92],[.43,.48,.01,.57,.66,.1]]};const RBX=[[0,0,0,1,1,1]];
+PB[256]={k:'plant',base:256,bx:[]};PB[257]={k:'plant',base:257,bx:[]};PB[258]={k:'plant',base:258,bx:[]};PB[259]={k:'bed',base:259,bx:[[.05,.18,.05,.95,.4,.95],[.1,.4,.08,.9,.51,.29],[.08,0,.08,.18,.18,.18],[.82,0,.08,.92,.18,.18],[.08,0,.82,.18,.18,.92],[.82,0,.82,.92,.18,.92]]};PB[260]={k:'chest',base:260,bx:[[.08,0,.08,.92,.76,.92],[.08,.76,.08,.92,.9,.92],[.43,.48,.01,.57,.66,.1]]};const RBX=[[0,0,0,1,1,1]];
 PB[85]={k:'wire',base:85,bx:[[.39,.02,0,.61,.06,1],[0,.02,.39,1,.06,.61]]};PB[86]={k:'wire',base:85,bx:[[.39,.02,0,.61,.06,1],[0,.02,.39,1,.06,.61]]};VAR.add(86);
 PB[243]={k:'redblock',base:243,bx:RBX};PB[244]={k:'rtorch',base:244,bx:[[.42,0,.42,.58,.72,.58]]};
 PB[245]={k:'button',base:245,bx:[[.31,0,.31,.69,.12,.69]]};PB[246]={k:'lever',base:246,bx:[[.44,0,.44,.56,.56,.56]]};
