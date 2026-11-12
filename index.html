@@ -90,6 +90,24 @@ body.t #mob{display:block}
 #bb{right:92px;bottom:calc(124px + env(safe-area-inset-bottom,0px))}
 #bp{right:20px;bottom:calc(158px + env(safe-area-inset-bottom,0px))}
 #shapeui{display:none;box-sizing:border-box;margin:8px 0;padding:8px;background:#555;border:2px solid #222;box-shadow:inset 2px 2px #888,inset -2px -2px #333;color:#fff;text-shadow:1px 1px #222;max-width:100%;font-size:18px}#pan.cat #shapeui.on{display:flex;gap:10px;align-items:center}#shapeart{width:70px;height:70px;flex:none;background:#222;border:2px solid #333;display:grid;place-items:center;image-rendering:pixelated}#shapeart svg{width:58px;height:58px;image-rendering:pixelated}.shape-copy{min-width:0;flex:1}.shape-title{font:400 10px "Press Start 2P",monospace;margin-bottom:6px;color:#ffe36e}.shape-sub{font-size:17px;line-height:1.05;color:#eee}.shape-variants{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}.shape-variants button{font:18px VT323,monospace;color:#fff;background:#686868;border:2px solid #222;box-shadow:inset 1px 1px #aaa,inset -1px -1px #333;padding:2px 6px;cursor:pointer}.shape-variants button:hover,.shape-variants button.on{background:#7885d0;border-color:#fff}.shape-variants.stairs button{min-width:44px}
+
+/* Pocket Edition touch HUD pass */
+#stat{left:5px;right:5px;top:calc(5px + env(safe-area-inset-top,0px));bottom:auto;width:auto;transform:none;align-items:flex-start}
+#hp{gap:0;white-space:nowrap}#hp span{font-size:22px;line-height:1}
+#fd{font-size:22px;line-height:1;white-space:nowrap}
+#top{left:50%;right:auto;top:calc(4px + env(safe-area-inset-top,0px));transform:translateX(-50%);gap:3px}
+#top b{width:34px;height:34px;border-radius:3px;background:#26354bb8;border:2px solid #a8bfd480;box-shadow:inset 1px 1px #d4e1f055;font-size:18px}
+#info{display:none}
+#bar{background:#1c2635a8;padding:3px;border:2px solid #10151dbb;gap:2px}
+.sl{background:#73849b78;border-color:#39495d;box-shadow:inset 1px 1px #ccd7e344}
+.sl.on{border-color:#f5f7ff;box-shadow:inset 0 0 0 1px #fff8}
+#joy{left:4%;bottom:calc(86px + env(safe-area-inset-bottom,0px));width:min(40vw,180px);height:min(40vw,180px);border-radius:4px;background:#6e89a33d;border:3px solid #9eb4cf72;box-shadow:inset 0 0 0 2px #18243655}
+#kn{left:28%;top:28%;width:44%;height:44%;border-radius:4px;background:#b8c9dc65;border:2px solid #dce7f25c;box-sizing:border-box}
+.ab{width:58px;height:58px;border-radius:4px;background:#7f99b67a;border:3px solid #afc3d57a;box-shadow:inset 2px 2px #e1ecf04a,inset -2px -2px #26384a55;color:#eef5ff;font-size:25px}
+#bj{right:4%;bottom:calc(145px + env(safe-area-inset-bottom,0px))}
+#bb{right:22%;bottom:calc(86px + env(safe-area-inset-bottom,0px))}
+#bp{right:4%;bottom:calc(86px + env(safe-area-inset-bottom,0px))}
+@media(max-width:520px){#top{gap:2px}#top b{width:30px;height:30px;font-size:16px}.ab{width:54px;height:54px}}
 </style></head><body>
 <canvas id="c"></canvas>
 <div id="menu">
@@ -260,7 +278,8 @@ richTile(2,(x,y,n)=>n<.09?[105,72,50]:n>.91?[154,111,75]:n<.33?[122,85,58]:n>.72
 richTile(3,stonePx);
 richTile(4,(x,y,n)=>{const grain=[76,56,35,0,0,12,28,12,0,0,34,12,0,0,20,0][x];return n<.12?[90-grain,61-grain,36-grain]:n>.91?[143-grain,103-grain,58-grain]:[115-grain,79-grain,44-grain]});
 richTile(5,(x,y,n)=>{const d=Math.hypot(x-7.5,y-7.5);if(d<1.6)return[198,169,104];if(d<3.2)return[145,111,62];if(d<5)return[185,151,91];if(d<6.8)return[132,98,55];return n>.7?[170,132,74]:[111,80,46]});
-richTile(6,(x,y,n)=>n<.16?[35,101,34]:n>.86?[82,157,49]:n<.48?[48,120,38]:[62,139,43]);
+richTile(6,(x,y,n)=>n<.1?[27,67,29]:n<.22?[38,91,34]:n>.88?[91,160,50]:n<.48?[47,119,38]:[65,139,43]);
+richTile(43,(x,y,n)=>{const wave=Math.sin(x*.48+y*.23);return n<.16?[24,84,151]:n>.92?[70,157,210]:wave>.65?[39,119,185]:n<.48?[31,102,174]:[35,111,182]});
 richTile(7,(x,y,n)=>n<.12?[198,184,122]:n>.88?[243,229,174]:n<.42?[218,205,150]:[231,217,160]);
 richTile(8,(x,y,n)=>{if(y%5==0)return[126,90,49];if((x+(Math.floor(y/5)%2)*4)%8==0)return[155,111,58];return n<.18?[174,126,68]:n>.86?[215,166,93]:[193,144,76]});
 richTile(9,(x,y,n)=>{const xx=(x+(Math.floor(y/4)%2)*3)%8,yy=y%4;if(xx==0||yy==0)return[83,84,84];if(xx==1||yy==1)return[108,109,108];return n<.2?[118,119,118]:n>.82?[151,151,149]:[133,134,132]});
