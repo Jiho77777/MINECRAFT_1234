@@ -118,7 +118,7 @@ body.t #mob{display:block}
 <div class="bt" id="bfov">시야각(FOV): 70</div><div class="bt" id="brd"></div><div class="bt" id="bmode"></div><div class="bt" id="bskin"></div><select class="bt" id="lg"></select>
 <div id="ver">Minecraft 26.3</div>
 </div>
-<div id="pause"><div class="ttl">게임 메뉴</div><div class="bt" id="pres">게임으로 돌아가기</div><div class="bt" id="pinv">인벤토리 열기</div><div class="bt" id="wsave">월드 저장</div><div class="bt" id="pcam"></div><div class="bt" id="pfov"></div><div class="bt" id="prd"></div><div class="bt" id="pskin"></div><select class="bt" id="lg2"></select><div class="bt" id="pquit">저장하고 타이틀로</div></div>
+<div id="pause"><div class="ttl">게임 메뉴</div><div class="bt" id="pres">게임으로 돌아가기</div><div class="bt" id="pinv">인벤토리 열기</div><div class="bt" id="wsave">월드 저장</div><div class="bt" id="pctrl">PC 조작으로 전환</div><div class="bt" id="pcam"></div><div class="bt" id="pfov"></div><div class="bt" id="prd"></div><div class="bt" id="pskin"></div><select class="bt" id="lg2"></select><div class="bt" id="pquit">저장하고 타이틀로</div></div>
 <div id="inv"><div id="invw"><div id="tabs"><b class="tb">📖</b><b class="tb">🧰</b><b class="tb on">📦</b><span style="flex:1"></span><span>?</span><span id="iclose">×</span></div>
 <div id="pan"><div id="up"><div id="arm"><div class="is"><span style="opacity:.3">🪖</span></div><div class="is"><span style="opacity:.3">👕</span></div><div class="is"><span style="opacity:.3">👖</span></div><div class="is"><span style="opacity:.3">🥾</span></div></div>
 <div id="pvw"><div id="pv"><svg viewBox="0 0 16 32" shape-rendering="crispEdges"><rect x="4" y="2" width="8" height="8" fill="#c99a73"/><rect x="4" y="2" width="8" height="3" fill="#2a1d14"/><rect x="5" y="6" width="2" height="1" fill="#222"/><rect x="9" y="6" width="2" height="1" fill="#222"/><rect x="4" y="10" width="8" height="12" fill="#2fa3a3"/><rect x="0" y="10" width="4" height="12" fill="#c99a73"/><rect x="12" y="10" width="4" height="12" fill="#c99a73"/><rect x="4" y="22" width="4" height="10" fill="#3a3a9a"/><rect x="8" y="22" width="4" height="10" fill="#3a3a9a"/></svg></div><div class="is"><span style="opacity:.3">🛡</span></div></div>
@@ -158,7 +158,7 @@ const nm=id=>RNAME[id]?RNAME[id][lang=='ko'?0:1]:PB[id]?(PB[id].k=='door'?tr(PB[
 const SEL=[['#spl','spl'],['#bplay','play'],['#bnew','newworld'],['#pause .ttl','pausetitle'],['#pres','resume'],['#pinv','openinv'],['#pquit','quit'],['.ct','craft'],['.ch','hint1'],['.svt','hint2'],['#bskin','skin'],['#pskin','skin'],['#skt','skin'],['#skup','skinup'],['#wct','wnew'],['#wgo','wcreate'],['#wback','wback'],['#wres','wres']];
 function applyLang(){document.documentElement.lang=lang;SEL.forEach(([s,k])=>document.querySelectorAll(s).forEach(e=>e.textContent=tr(k)));$('lg').value=$('lg2').value=lang;const cs=$('catSearch');if(cs)cs.placeholder=lang=='ko'?'아이템 검색':'Search items';setLabels();rcraft()}
 ['lg','lg2'].forEach(id=>{const s=$(id);LG.forEach(([c,n])=>s.add(new Option('🌐 '+n,c)));s.onchange=()=>{lang=s.value;try{localStorage.setItem('mclang',lang)}catch(e){}applyLang()}});
-let touch=matchMedia('(pointer:coarse)').matches||'ontouchstart' in window;
+let savedControlMode=localStorage.getItem('mcinputmode')||'auto';let touch=savedControlMode==='touch'||(savedControlMode==='auto'&&(matchMedia('(pointer:coarse)').matches||'ontouchstart' in window));
 document.body.classList.toggle('t',touch);
 const W=48,H=32,CS=16,NC=W/CS;let dimension=0,dimCache={};
 let data=new Uint8Array(W*H*W),seed=1;
@@ -293,6 +293,8 @@ const oreTile=(t,ore)=>richTile(t,(x,y,n)=>{for(const[a,b]of[[2,3],[9,3],[5,9],[
 richTile(25,(x,y,n)=>n<.18?[201,187,132]:n>.85?[246,231,177]:[225,211,156]);
 richTile(26,(x,y,n)=>n<.12?[219,222,225]:n>.9?[255,255,255]:[240,242,243]);
 richTile(27,(x,y,n)=>{const row=y%5,off=(Math.floor(y/5)%2)*4;if(row==0||((x+off)%8==0&&row<4))return[151,145,119];return n<.16?[193,181,140]:n>.9?[235,225,182]:[215,204,161]});
+richTile(18,(x,y,n)=>{if(x<2||x>13||y<2||y>13)return[82,48,25];if(x==2||x==13||y==2||y==13)return[190,141,79];if(x>=4&&x<=11&&y>=4&&y<=11){const gx=(x-4)%3,gy=(y-4)%3;if(gx==0||gy==0)return[77,53,33];return n<.25?[174,128,70]:[194,148,83]}return n<.2?[167,117,60]:[183,131,67]});
+richTile(19,(x,y,n)=>{if(x<2||x>13||y<2||y>13)return[77,43,22];if(y<4||y>11)return n<.2?[143,91,43]:[161,105,51];if(x<5||x>10)return n<.25?[173,115,55]:[187,127,61];if((x==5||x==10)&&(y==5||y==10))return[91,55,29];if((x==6||x==9)&&(y==6||y==9))return[205,155,87];return (y%4==0)?[128,78,38]:[154,96,46]});
 richTile(28,(x,y,n)=>n<.18?[55,104,48]:n>.88?[148,154,138]:n<.5?[104,111,105]:[128,132,124]);
 richTile(42,(x,y,n)=>x<2||y<2||x>13||y>13?[76,76,77]:n<.15?[104,105,106]:n>.88?[153,153,151]:[128,129,128]);
 richTile(70,(x,y,n)=>x<2||y<2||x>13||y>13?[91,69,43]:((x+Math.floor(y/4))%7==0)?[150,113,66]:n<.16?[166,126,75]:n>.86?[211,177,126]:[188,151,98]);
@@ -690,7 +692,8 @@ const catSearch=document.createElement('input');catSearch.id='catSearch';catSear
 const keys={};let jx=0,jy=0,jump=false,brk=false,cd=0;
 function setLabels(){const a=tr('cam')+': '+tr(third?'cam3':'cam1'),b=tr('fov')+': '+fov;$('bcam').textContent=$('pcam').textContent=a;$('bfov').textContent=$('pfov').textContent=b;$('brd').textContent=$('prd').textContent=tr('rd')+': '+RD+' '+tr('chunks');$('bmode').textContent=tr('mode')+': '+tr(creative?'creative':'survival');$('wmode').textContent=tr('mode')+': '+tr(creative?'creative':'survival');$('wtype').textContent=tr('wtype')+': '+tr(wtype?'flat':'normal')}
 function ui(s){const tp=$('tip');if(tp)tp.style.display='none';if(state=='inv'&&s!='inv')closeInv();state=s;const c=document.body.classList;c.toggle('play',s!='menu');c.toggle('pause',s=='pause');c.toggle('inv',s=='inv');c.toggle('cft',s=='craft');brk=false;jx=jy=0}
-function plFail(){if(touch)return;touch=true;document.body.classList.add('t');jx=jy=0}
+function plFail(){if(touch||savedControlMode==='pc')return;touch=true;document.body.classList.add('t');jx=jy=0}
+function toggleControls(){savedControlMode=touch?'pc':'touch';try{localStorage.setItem('mcinputmode',savedControlMode)}catch(e){}touch=savedControlMode==='touch';document.body.classList.toggle('t',touch);$('pctrl').textContent=touch?'PC 조작으로 전환':'모바일 조작으로 전환';jx=jy=0;kn.style.transform=''}
 function rpl(){try{const r=$('c').requestPointerLock?.();if(r&&r.catch)r.catch(plFail)}catch(e){plFail()}}
 document.addEventListener('pointerlockerror',plFail);
 function start(){ui('play');if(!touch)rpl()}
@@ -714,7 +717,7 @@ $('wgo').onclick=()=>{worldName=$('wname').value.trim()||'월드';document.body.
 $('wres').onclick=$('wback').onclick=e=>{creative=cm0;wtype=wt0;setLabels();document.body.classList.remove('wcr');if(e.currentTarget.id=='wres')start()};$('bnew').onclick=()=>{worldName=$('wname').value.trim()||'월드';newWorld();start();saveWorld()};
 $('bcam').onclick=$('pcam').onclick=()=>{third=!third;setLabels()};
 $('bfov').onclick=$('pfov').onclick=()=>{fov=fov==70?90:fov==90?110:fov==110?60:70;cam.fov=fov;cam.updateProjectionMatrix();setLabels()};
-$('tm').onpointerdown=e=>{e.stopPropagation();pause()};$('ti').onpointerdown=e=>{e.stopPropagation();inv()};$('pres').onclick=start;$('pinv').onclick=inv;$('pquit').onclick=menu;$('brd').onclick=$('prd').onclick=()=>{RD=RD>=6?2:RD+1;mkOff();pcx=1e9;setLabels()};$('bmode').onclick=()=>{creative=!creative;applyMode();setLabels()};$('te').onpointerdown=e=>{e.stopPropagation();eat()};$('cx').onclick=start;$('cft').onpointerdown=e=>{if(e.target.id=='cft')start()};{const tb=document.querySelectorAll('.tb');tb[0].onpointerdown=()=>{if(creative)tabv(1)};tb[1].onpointerdown=()=>tabv(2);tb[2].onpointerdown=()=>tabv(0)}$('iclose').onclick=start;$('inv').onpointerdown=e=>{if(e.target.id=='inv')start()};
+$('tm').onpointerdown=e=>{e.stopPropagation();pause()};$('ti').onpointerdown=e=>{e.stopPropagation();inv()};$('pres').onclick=start;$('pinv').onclick=inv;$('pctrl').onclick=toggleControls;$('pquit').onclick=menu;$('brd').onclick=$('prd').onclick=()=>{RD=RD>=6?2:RD+1;mkOff();pcx=1e9;setLabels()};$('bmode').onclick=()=>{creative=!creative;applyMode();setLabels()};$('te').onpointerdown=e=>{e.stopPropagation();eat()};$('cx').onclick=start;$('cft').onpointerdown=e=>{if(e.target.id=='cft')start()};{const tb=document.querySelectorAll('.tb');tb[0].onpointerdown=()=>{if(creative)tabv(1)};tb[1].onpointerdown=()=>tabv(2);tb[2].onpointerdown=()=>tabv(0)}$('iclose').onclick=start;$('inv').onpointerdown=e=>{if(e.target.id=='inv')start()};
 $('tc').onpointerdown=e=>{e.stopPropagation();third=!third;setLabels()};
 $('tf').onpointerdown=e=>{e.stopPropagation();if(creative){fly=!fly;P.vy=0}};
 document.addEventListener('pointerlockchange',()=>{locked=document.pointerLockElement==$('c');if(!locked&&state=='play'&&!touch)pause()});
@@ -723,10 +726,10 @@ addEventListener('keydown',e=>{const k=e.key.toLowerCase();keys[k]=true;
  if(k==' '){e.preventDefault();if(!e.repeat)tapJump()}});
 addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);
 addEventListener('wheel',e=>{if(state=='play')pick(sel+(e.deltaY>0?1:-1))});
-addEventListener('mousemove',e=>{if(locked){yaw-=e.movementX*.0025;pitch=Math.max(-1.55,Math.min(1.55,pitch-e.movementY*.0025))}});
-addEventListener('mousedown',e=>{if(state!='play'||touch)return;if(!locked){rpl();return}
+let mouseLook=false,lastMX=0,lastMY=0;addEventListener('mousemove',e=>{if(locked){yaw-=e.movementX*.0025;pitch=Math.max(-1.55,Math.min(1.55,pitch-e.movementY*.0025))}else if(mouseLook&&state==='play'&&!touch){yaw-=(e.clientX-lastMX)*.004;pitch=Math.max(-1.55,Math.min(1.55,pitch-(e.clientY-lastMY)*.004));lastMX=e.clientX;lastMY=e.clientY}});
+addEventListener('mousedown',e=>{if(state!='play'||touch)return;if(!locked){if(e.button===0){mouseLook=true;lastMX=e.clientX;lastMY=e.clientY;try{$('c').requestPointerLock?.()}catch(x){}}return}
  if(e.button==0){if(HOT[sel]==29)act(false);else if(!hitMob()){brk=true;cd=0}}else if(e.button==2)act(false)});
-addEventListener('mouseup',e=>{if(e.button==0)brk=false});
+addEventListener('mouseup',e=>{if(e.button==0){brk=false;mouseLook=false}});
 addEventListener('contextmenu',e=>e.preventDefault());
 // touch
 let jid=null,lid=null,lx=0,ly=0;
